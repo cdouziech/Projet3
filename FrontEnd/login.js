@@ -30,15 +30,14 @@ async function login(){
     response = await getResponse();
     console.log(response);
     if(response.token){
-        logAsAdmin();
+        logAsAdmin(response);
     }  else {
         loginError();
     }
 }
 
 
-async function logAsAdmin(){
-    response = await getResponse();
+async function logAsAdmin(response){          // response passé en argument pour pas répéter l'appel à l'API
     sessionStorage.setItem('token',response.token);
     window.location.replace('index.html');
 }

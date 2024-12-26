@@ -47,22 +47,27 @@ async function DeleteFromAPI(id){
         });
 }
 async function PostNewProject(infos) {
+    const formedData = new FormData();
+
+    infos = await infos;
+    formedData.append('image', infos.image);
+    formedData.append('title', infos.title);
+    formedData.append('category', infos.category);
+
     try {
-      const response = await fetch('http://localhost:5678/api/works', {
+        const response = await fetch('http://localhost:5678/api/works', {
         method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': 'Bearer ' + active_token,
-          'accept' : 'application/json'
+            'Authorization': 'Bearer ' + active_token,
+            'accept' : 'application/json'
         },
-        body: FormData(infos)
-      });
-      const result = await response.json();
-      return(result);
-
+        body: formedData
+    });
+    const result = await response.json();
+    return(result);
     } catch (error) {
-      console.error("Error:", error.message);
-      return null;
+        console.error("Error:", error.message);
+        return null;
     }
 }
 const sectionProjets = document.querySelector(".gallery");
@@ -75,6 +80,8 @@ const active_token = sessionStorage.getItem('token');
 const img_input = document.querySelector('.img-input');
 const before_preview = document.querySelector('.before-preview');
 const previewed_img_container = document.querySelector('.previewed-img-container');
+
+const addProjectBtn = document.querySelector('.add-bottom-btn');
 
 if (active_token){display_admin_page()};
 
@@ -224,8 +231,7 @@ const add_page = document.querySelector('.add-aside');
 
         modale.style.display = 'flex';
         modale_shadow.style.display = 'block';
-
-        if(modale_cards.childElementCount < works.length){ /*nécessaire pour ne pas afficher deux fois les meme projets */
+        if(modale_cards.childElementCount < works.length){ /*nécessaire pour ne pas afficher deux fois l'ensemble des projets */
 
             works.forEach((item) => {
                 const cardContainer = document.createElement('div');
@@ -253,6 +259,11 @@ const add_page = document.querySelector('.add-aside');
                 modale_cards.appendChild(cardContainer);
 
             });
+            console.log(modale_cards.childElementCount, works.length);
+
+            while(modale_cards.childElementCount > works.length){                         // pourquoi modale affiche projets 2 fois
+                modale_cards.firstChild.remove();                      
+            }
         };
     };
 
@@ -266,7 +277,6 @@ const add_page = document.querySelector('.add-aside');
         }
 
         display_modale();
-
         remove_projects();
         display_projects('all');
     };
@@ -283,21 +293,21 @@ const add_page = document.querySelector('.add-aside');
     }
 
     async function getNewProjectInfos(){
-        let img = document.querySelector('.previewed-img');
+        let imgInput = document.querySelector('.img-input');
         const title = document.querySelector('.title-input').value;
         const categoryName = document.querySelector('.category-input').value;
         let categoryId;
 
 
         categories.forEach((category)=>{
-            if (category.name == categoryName){
+            if (category.name === categoryName){
                 categoryId = category.id;
             }
         });
 
         console.log(document.querySelector('.img-input'));
         const infos = {
-            'image' : img,
+            'image' : imgInput.files[0],
             'title' : title,
             'category' : categoryId
         }
@@ -305,15 +315,51 @@ const add_page = document.querySelector('.add-aside');
         console.log(infos);
         return(infos)
     }
-    function addProject(){
+    async function addProject(){
+        display_well_added();
+
         infos = getNewProjectInfos();
-        PostNewProject(infos);
+        await PostNewProject(infos);
+
+        await refreshWorks();
+        refreshAddPage();
+
+        remove_projects();
+        display_projects('all');
+
+
     }
-    const addProjectBtn = document.querySelector('.add-bottom-btn');
-    addProjectBtn.addEventListener('click', ()=> addProject(), false);
+    function display_error_add(){
+        errorMsgAddPage.style.color = 'black';
+    }
+    
+    const errorMsgAddPage = document.querySelector('.error-add');
+    addProjectBtn.addEventListener('click',display_error_add, false);
+
+
+    const addImgInput = document.querySelector('#previewed_img_input');
+    const addTitleInput = document.querySelector('.title-input');
+    const addCategoryNameInput = document.querySelector('.category-input');
+    const addInputs = [addCategoryNameInput,addTitleInput,addImgInput];
+
+    addInputs.forEach((item)=>{
+        item.addEventListener('change', ()=> turnOnAddBtn() ,false);
+    });
+
+    function turnOnAddBtn(){
+        errorMsgAddPage.style.color = 'white';
+        if(addImgInput.value && addTitleInput.value && addCategoryNameInput.value){
+            addProjectBtn.removeEventListener('click',display_error_add, false);
+            addProjectBtn.style.backgroundColor = '#1D6154';
+            addProjectBtn.addEventListener('click', ()=> addProject(), false);
+        }
+    };
+
 })();
-
-
+function display_well_added(){
+    const msg = document.querySelector('.well-added');
+    msg.style.color = 'black';
+}
 function hide_modale(){
     modale_shadow.style.display = 'none';
     modale.style.display = 'none';
@@ -354,7 +400,6 @@ function displayPreviewImg(){
     const img = document.createElement('img');
     img.classList.add('previewed-img');
     previewed_img_container.style.height = '100%';
-    
     const file = img_input.files[0];
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -378,10 +423,16 @@ function refreshAddPage(){
     };
     previewed_img_container.style.height = '0';
     before_preview.style.display ='flex';
-
+    const category = document.querySelector('.category-input');
     let title = document.querySelector('.title-input');
-
+    
+    if(category){
+        category.value = category[0];
+    }
     if(title){
         title.value = '';
     }
+    document.querySelector('.img-input').value = '';
+    
+    addProjectBtn.style.backgroundColor = '#1D6154';
 }

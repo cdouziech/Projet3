@@ -500,3 +500,10 @@ aside {
 .before-preview form{
 	width: 40%;
 }
+.add-bottom-btn {
+	background-color: #CBD6DC;
+}
+.error-add, .well-added{
+	color: white;
+}
+
