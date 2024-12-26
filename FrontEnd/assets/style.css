@@ -503,7 +503,8 @@ aside {
 .add-bottom-btn {
 	background-color: #CBD6DC;
 }
-.error-add, .well-added{
-	color: white;
+.add-msg{
+	font-weight: bold;
+	font-size: large;
 }
 

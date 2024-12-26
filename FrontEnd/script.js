@@ -70,6 +70,9 @@ async function PostNewProject(infos) {
         return null;
     }
 }
+
+
+
 const sectionProjets = document.querySelector(".gallery");
 const sectionFiltres = document.querySelector(".filtres");
 
@@ -83,6 +86,16 @@ const previewed_img_container = document.querySelector('.previewed-img-container
 
 const addProjectBtn = document.querySelector('.add-bottom-btn');
 
+const addMsg = document.querySelector('.add-msg');
+
+const modale_shadow = document.querySelector('.modale-shadow');
+const modale = document.querySelector('.modale');
+const modale_cards = document.querySelector('.modale-cards');
+const add_page = document.querySelector('.add-aside');
+
+
+
+
 if (active_token){display_admin_page()};
 
 function display_admin_page(){
@@ -91,6 +104,8 @@ function display_admin_page(){
     display_modify_btn();
     loginToLogout();
 }
+
+
 
 function loginToLogout(){
     login_page_button.innerHTML = 'logout';
@@ -109,10 +124,10 @@ function remove_filtres(){
     filtres.remove();
 };
 
-const modale_shadow = document.querySelector('.modale-shadow');
-const modale = document.querySelector('.modale');
-const modale_cards = document.querySelector('.modale-cards');
-const add_page = document.querySelector('.add-aside');
+
+
+
+
 (async () => {
 
     /* Récupérer l'API */
@@ -231,17 +246,16 @@ const add_page = document.querySelector('.add-aside');
 
         modale.style.display = 'flex';
         modale_shadow.style.display = 'block';
-        if(modale_cards.childElementCount < works.length){ /*nécessaire pour ne pas afficher deux fois l'ensemble des projets */
-
+        while(modale_cards.firstChild){                         
+            modale_cards.firstChild.remove();                      
+        };
             works.forEach((item) => {
                 const cardContainer = document.createElement('div');
         
                 const imageElement = document.createElement("img");
                 imageElement.src = item.imageUrl;
                 imageElement.alt = item.title;
-                //utiliser item.id pour tracer les projets et pouvoir les delete
 
-                
                 const remove_btn = document.createElement("img");
                 remove_btn.id = item.id ;
                 remove_btn.src = 'assets/images/bin_icon.png';
@@ -259,26 +273,20 @@ const add_page = document.querySelector('.add-aside');
                 modale_cards.appendChild(cardContainer);
 
             });
-            console.log(modale_cards.childElementCount, works.length);
-
-            while(modale_cards.childElementCount > works.length){                         // pourquoi modale affiche projets 2 fois
-                modale_cards.firstChild.remove();                      
-            }
-        };
     };
 
     async function delete_project(id){
 
         await DeleteFromAPI(id);
-        await refreshWorks();
-
-        while (modale_cards.firstChild) {
-            modale_cards.firstChild.remove();
+        if (await DeleteFromAPI(id) == undefined){
+            await refreshWorks();
+            while (modale_cards.firstChild) {
+                modale_cards.firstChild.remove();
+            }
+            display_modale();
+            remove_projects();
+            display_projects('all');
         }
-
-        display_modale();
-        remove_projects();
-        display_projects('all');
     };
 
     const modify_btn = document.querySelector('.modify-btn');
@@ -292,7 +300,7 @@ const add_page = document.querySelector('.add-aside');
         category_add_page.appendChild(category);
     }
 
-    async function getNewProjectInfos(){
+    function getNewProjectInfos(){
         let imgInput = document.querySelector('.img-input');
         const title = document.querySelector('.title-input').value;
         const categoryName = document.querySelector('.category-input').value;
@@ -316,24 +324,28 @@ const add_page = document.querySelector('.add-aside');
         return(infos)
     }
     async function addProject(){
-        display_well_added();
 
-        infos = getNewProjectInfos();
-        await PostNewProject(infos);
+        if(addImgInput.value && addTitleInput.value && addCategoryNameInput.value){
+            display_well_added();
 
-        await refreshWorks();
-        refreshAddPage();
+            infos = getNewProjectInfos();
+            await PostNewProject(infos);
 
-        remove_projects();
-        display_projects('all');
+            await refreshWorks();
+            refreshAddPage();
 
+            remove_projects();
+            display_projects('all');
+        }else{
+            display_error_add();
+        };
 
     }
     function display_error_add(){
-        errorMsgAddPage.style.color = 'black';
+        addMsg.innerHTML = 'Veuillez remplir tous les champs d\'informations';
     }
-    
-    const errorMsgAddPage = document.querySelector('.error-add');
+    addProjectBtn.addEventListener('click', ()=> addProject(), false);
+
     addProjectBtn.addEventListener('click',display_error_add, false);
 
 
@@ -347,22 +359,22 @@ const add_page = document.querySelector('.add-aside');
     });
 
     function turnOnAddBtn(){
-        errorMsgAddPage.style.color = 'white';
         if(addImgInput.value && addTitleInput.value && addCategoryNameInput.value){
-            addProjectBtn.removeEventListener('click',display_error_add, false);
             addProjectBtn.style.backgroundColor = '#1D6154';
-            addProjectBtn.addEventListener('click', ()=> addProject(), false);
+        } else {
+            addProjectBtn.style.backgroundColor = '#CBD6DC';
         }
     };
 
 })();
 function display_well_added(){
-    const msg = document.querySelector('.well-added');
-    msg.style.color = 'black';
+    addMsg.innerHTML = 'Projet ajouté avec succès !'
 }
 function hide_modale(){
     modale_shadow.style.display = 'none';
     modale.style.display = 'none';
+    addMsg.innerHTML = '';
+
 };
 function display_shadow(){
     modale_shadow.style.display = 'block';
@@ -401,6 +413,14 @@ function displayPreviewImg(){
     img.classList.add('previewed-img');
     previewed_img_container.style.height = '100%';
     const file = img_input.files[0];
+    if (file.size > 4000000 ){
+        display_img_size_error();
+        return;
+    }
+    if(!(file.type == 'image/png' || file.type == 'image/jpeg')){
+        display_img_type_error();
+        return
+    }
     const reader = new FileReader();
     reader.onload = function (e) {
         img.src = e.target.result;
@@ -408,11 +428,17 @@ function displayPreviewImg(){
     reader.readAsDataURL(file);
     //  gérer la taille du fichier 
     console.log(file);
+
     img.alt = 'wanted image';
     before_preview.style.display ='none'
     previewed_img_container.appendChild(img);
 };
-
+function display_img_size_error(){
+    addMsg.innerHTML = 'L\'image est trop volumineuse';
+}
+function display_img_type_error(){
+    addMsg.innerHTML = 'Le fichier choisi n\'est pas au bon format';
+}
 img_input.addEventListener('change', ()=> displayPreviewImg() ,false );
 
 function refreshAddPage(){
@@ -434,5 +460,4 @@ function refreshAddPage(){
     }
     document.querySelector('.img-input').value = '';
     
-    addProjectBtn.style.backgroundColor = '#1D6154';
 }
