@@ -24,16 +24,16 @@
     </header>
     <main>
         <h1>Log In</h1>
-        <div class="mail-input-box">
-            <p>E-mail</p>
+        <form class="mail-input-box">
+            <label for="mail">E-mail</label>
             <input type="text" id="mail">
-        </div>
-        <div class="pw-input-box">
-            <p>Mot de passe</p>
+        </form>
+        <form class="pw-input-box">
+            <label for="pw">Mot de passe</label>
             <input type="password" id="pw">
-        </div>
+        </form>
         <p class="error-msg"></p>
-        <button class="log-btn" onclick="login()">Se connecter</button>
+        <button type="submit" class="log-btn" onclick="login()">Se connecter</button>
         <a href="">Mot de passe oublié</a>
     </main>
     <footer>
@@ -43,6 +43,6 @@
             </ul>
         </nav>
     </footer>
+    <script src="login.js"></script>
 </body>
-<script src="login.js" defer></script>
 </html>

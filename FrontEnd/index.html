@@ -25,7 +25,7 @@
 	</nav>
 </header>
 <main>
-	<section id="introduction">
+	<div id="introduction">
 		<figure>
 			<img src="./assets/images/sophie-bluel.png" alt="">
 		</figure>
@@ -35,9 +35,12 @@
 			<p>Chaque projet sera étudié en commun, de façon à mettre en valeur les volumes, les matières et les couleurs dans le respect de l’esprit des lieux et le choix adapté des matériaux. Le suivi du chantier sera assuré dans le souci du détail, le respect du planning et du budget.</p>
 			<p>En cas de besoin, une équipe pluridisciplinaire peut-être constituée : architecte DPLG, décorateur(trice)</p>
 		</article>
-	</section>
+	</div>
 	<section id="portfolio">
-		<h2>Mes projets<div class="modify-btn"><img class='modify-icon' src="assets/icons/modify-icon.png" alt="modify icon">Modifier</div></h2>
+		<div class="mes-projets">
+			<h2>Mes projets</h2>
+			<div class="modify-btn"><img class='modify-icon' src="assets/icons/modify-icon.png" alt="modify icon">Modifier</div>
+		</div>
 		<p class="modify"></p>
 		<div class="filtres">
 			
@@ -61,9 +64,9 @@
 	</section>
 
 	<aside class="modale">
-		<div class="modale-and-add-top-btns"><button><img onclick="hide_modale()" src="assets\images\x_close_cross_delete_icon_159748.webp" alt="quit cross"></button></div>
+		<div class="modale-and-add-top-btns"><button><img onclick="hide_modale()" src="assets/images/x_close_cross_delete_icon_159748.webp" alt="quit cross"></button></div>
 		<h1 class="modale-title">Galerie photo</h1>
-		<section class="modale-cards"></section>
+		<div class="modale-cards"></div>
 		<div class="modale-divider"></div>
 		<button class="modale-bottom-btn" onclick='modaleToAddPage()'>Ajouter une photo</button>
 	</aside>
@@ -91,13 +94,13 @@
 
 		<div class="add-page-input-container">
 			<div class="title-input-box">
-				<p>Titre</p>
+				<label for="mail">Titre</label>
 				<input type="text" id="mail" class="title-input">
 			</div>
 			<div class="category-input-box">
 				<label for="category">Catégorie</label>
 				<select id="category" name="category" class="category-input">
-					<option></option>
+					<option label=" "></option>
 				</select>
 			</div>
 		</div>
@@ -115,6 +118,6 @@
 		</ul>
 	</nav>
 </footer>
-</body>
 <script src="script.js"></script>
+</body>
 </html>
